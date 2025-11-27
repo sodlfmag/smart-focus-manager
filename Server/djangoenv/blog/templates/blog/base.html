@@ -1,0 +1,27 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Intruder Detection{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/blog.css' %}">
+</head>
+<body>
+    <div class="header">
+        <h1><a href="/">Intruder Detection</a></h1>
+        {% if user.is_authenticated %}
+        <div class="top-menu">
+            <a href="{% url 'blog:post_new' %}" class="btn-new-post">
+                <span class="icon">+</span> 새 게시물 작성
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="content">
+        {% block content %}
+        {% endblock %}
+    </div>
+</body>
+</html>

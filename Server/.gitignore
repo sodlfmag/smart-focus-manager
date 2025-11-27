@@ -1,0 +1,6 @@
+request/
+*.bin
+__pycache__/
+*.pyc
+
+venv*

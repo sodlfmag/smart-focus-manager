@@ -1,0 +1,32 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}새 게시물 작성 - Web Service programming blog{% endblock %}
+
+{% block content %}
+<div class="post-edit-container">
+    <h1 class="edit-title">새 게시물 작성</h1>
+    
+    <form method="POST" class="post-form">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="{{ form.title.id_for_label }}" class="form-label">제목</label>
+            {{ form.title }}
+        </div>
+        
+        <div class="form-group">
+            <label for="{{ form.text.id_for_label }}" class="form-label">내용</label>
+            {{ form.text }}
+        </div>
+        
+        <div class="form-group">
+            <label for="{{ form.image.id_for_label }}" class="form-label">이미지</label>
+            {{ form.image }}
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn-save">게시물 저장</button>
+            <a href="{% url 'blog:post_list' %}" class="btn-cancel">취소</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

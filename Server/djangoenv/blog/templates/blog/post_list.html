@@ -1,0 +1,36 @@
+{% extends 'blog/base.html' %}
+
+{% block content %}
+<div class="posts-container">
+    {% for post in posts %}
+        <div class="post">
+            <div class="post-header">
+                <p class="post-date">
+                    <strong>Published:</strong> 
+                    {% if post.published_date %}
+                        {{ post.published_date|date:"F d, Y" }}
+                    {% else %}
+                        Draft
+                    {% endif %}
+                </p>
+            </div>
+            <div class="post-body">
+                <h2 class="post-title">
+                    <a href="{% url 'blog:post_detail' pk=post.pk %}">{{ post.title }}</a>
+                </h2>
+                {% if post.image %}
+                <div class="post-image-list">
+                    <img src="{{ post.image.url }}" class="blog-image-list" alt="{{ post.title }}">
+                </div>
+                {% endif %}
+                <p class="post-content">{{ post.text|linebreaksbr|truncatewords:30 }}</p>
+            </div>
+        </div>
+    {% empty %}
+        <div class="empty-message">
+            <h3>아직 게시된 포스트가 없습니다.</h3>
+            <p>첫 번째 포스트를 작성해보세요!</p>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,458 @@
+/* 전체 페이지 스타일 */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    margin: 0;
+    padding: 20px;
+    min-height: 100vh;
+}
+
+/* 헤더 스타일 */
+.header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 30px 0;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+/* 상단 메뉴 */
+.top-menu {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
+.btn-new-post {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #FCA205 0%, #ff8c00 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: 25px;
+    font-weight: 500;
+    font-size: 0.9em;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(252, 162, 5, 0.3);
+}
+
+.btn-new-post:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(252, 162, 5, 0.4);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-new-post .icon {
+    margin-right: 8px;
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+h1 a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 2.5em;
+    font-weight: 300;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+h1 a:hover {
+    color: #FCA205;
+    transform: scale(1.05);
+}
+
+/* 포스트 컨테이너 */
+.posts-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* 개별 포스트 스타일 */
+.post {
+    background: rgba(255, 255, 255, 0.95);
+    margin: 30px 0;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.post:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+}
+
+/* 포스트 헤더 */
+.post-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    text-align: left;
+}
+
+.post-date {
+    font-size: 0.9em;
+    opacity: 0.9;
+    margin: 0;
+}
+
+/* 포스트 본문 */
+.post-body {
+    padding: 25px;
+    text-align: left;
+}
+
+.post-title {
+    color: #333;
+    font-size: 1.8em;
+    margin: 0 0 15px 0;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.post-content {
+    color: #666;
+    line-height: 1.6;
+    font-size: 1.1em;
+    margin: 0;
+}
+
+/* 빈 상태 메시지 */
+.empty-message {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1.2em;
+    margin: 50px 0;
+    padding: 40px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+}
+
+/* 포스트 상세 페이지 */
+.post-detail {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.post-detail .post {
+    margin: 30px 0;
+}
+
+.post-detail .post-title {
+    font-size: 2.2em;
+    margin-bottom: 20px;
+}
+
+.post-detail .post-content {
+    font-size: 1.2em;
+    line-height: 1.8;
+}
+
+/* 포스트 액션 버튼 */
+.post-actions {
+    text-align: center;
+    margin: 40px 0;
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn-back {
+    display: inline-flex;
+    align-items: center;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: 25px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.btn-back:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-edit {
+    display: inline-flex;
+    align-items: center;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #FCA205 0%, #ff8c00 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: 25px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(252, 162, 5, 0.3);
+}
+
+.btn-edit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(252, 162, 5, 0.4);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-edit .icon {
+    margin-right: 8px;
+    font-size: 1.1em;
+}
+
+/* 포스트 제목 링크 스타일 */
+.post-title a {
+    color: #333;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.post-title a:hover {
+    color: #667eea;
+    text-decoration: none;
+}
+
+/* 게시물 편집 폼 스타일 */
+.post-edit-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.edit-title {
+    text-align: center;
+    color: #333;
+    font-size: 2.2em;
+    margin-bottom: 40px;
+    font-weight: 300;
+}
+
+.post-form {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.form-group {
+    margin-bottom: 25px;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+    font-size: 1.1em;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #e1e5e9;
+    border-radius: 8px;
+    font-size: 1em;
+    font-family: inherit;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-group textarea {
+    min-height: 200px;
+    resize: vertical;
+}
+
+.form-group input[type="file"] {
+    padding: 8px;
+    border: 2px dashed #e1e5e9;
+    background: #f8f9fa;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+}
+
+.form-group input[type="file"]:hover {
+    border-color: #667eea;
+    background: #f0f2ff;
+}
+
+/* 포스트 이미지 스타일 */
+.post-image {
+    margin: 20px 0;
+    text-align: center;
+}
+
+.post-image-img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.post-image-img:hover {
+    transform: scale(1.02);
+}
+
+/* 포스트 목록 이미지 스타일 */
+.post-image-list {
+    margin: 15px 0;
+    text-align: center;
+}
+
+.blog-image-list {
+    max-width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.blog-image-list:hover {
+    transform: scale(1.02);
+}
+
+.form-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-end;
+    margin-top: 30px;
+}
+
+.btn-save {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 1em;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.btn-save:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.btn-cancel {
+    background: #6c757d;
+    color: white;
+    text-decoration: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 1em;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+.btn-cancel:hover {
+    background: #5a6268;
+    transform: translateY(-2px);
+    color: white;
+    text-decoration: none;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+    
+    h1 a {
+        font-size: 2em;
+    }
+    
+    .header {
+        padding: 20px 0;
+    }
+    
+    .top-menu {
+        position: static;
+        margin-top: 15px;
+        text-align: center;
+    }
+    
+    .btn-new-post {
+        font-size: 0.8em;
+        padding: 8px 16px;
+    }
+    
+    .post {
+        margin: 20px 0;
+    }
+    
+    .post-body {
+        padding: 20px;
+    }
+    
+    .post-title {
+        font-size: 1.5em;
+    }
+    
+    .post-detail .post-title {
+        font-size: 1.8em;
+    }
+    
+    .post-detail .post-content {
+        font-size: 1.1em;
+    }
+    
+    .post-edit-container {
+        padding: 20px 10px;
+    }
+    
+    .post-form {
+        padding: 20px;
+    }
+    
+    .edit-title {
+        font-size: 1.8em;
+        margin-bottom: 30px;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .btn-save,
+    .btn-cancel {
+        width: 100%;
+        text-align: center;
+    }
+    
+    .post-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .btn-back,
+    .btn-edit {
+        width: 100%;
+        justify-content: center;
+    }
+}
