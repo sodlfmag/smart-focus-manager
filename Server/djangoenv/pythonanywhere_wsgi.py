@@ -10,7 +10,7 @@ import os
 import sys
 
 # 프로젝트 경로 설정 (yourusername을 실제 사용자명으로 변경)
-path = '/home/yourusername/common2/PhotoBlogServer/djangoenv'
+path = '/home/yourusername/smart_focus_manager/Server/djangoenv'
 if path not in sys.path:
     sys.path.append(path)
 
