@@ -53,9 +53,9 @@ def main():
                 # 서버가 실행 중이라고 하면 detect.py가 실행되어야 함
                 if not is_process_running(detect_process):
                     print("Starting detect.py...")
-                    # detect.py 실행 (웹캠 사용: source=0)
+                    # detect.py 실행 (웹캠 사용: source=0, Person(0)과 Cell Phone(67)만 감지)
                     detect_process = subprocess.Popen(
-                        [sys.executable, str(DETECT_SCRIPT), '--source', '0', '--nosave'],
+                        [sys.executable, str(DETECT_SCRIPT), '--source', '0', '--nosave', '--classes', '0', '67'],
                         cwd=str(EDGE_DIR)
                     )
                     print(f"detect.py started with PID: {detect_process.pid}")
