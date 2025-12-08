@@ -47,9 +47,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import android.os.Handler;
-import android.os.Looper;
-import android.graphics.drawable.GradientDrawable;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
@@ -63,8 +60,6 @@ public class MainActivity extends AppCompatActivity {
     Switch switchSystemControl;
     TextView tvDistractedCount;
     TextView tvFocusTime;
-    View stateIndicatorCircle;
-    TextView stateIndicatorText;
     // 에뮬레이터: 10.0.2.2, 실제 기기: PC의 IP 주소로 변경 필요 (예: 192.168.0.5)
     // String site_url = "http://10.0.2.2:8000";
     String site_url = "https://sodlfmag.pythonanywhere.com";
@@ -83,12 +78,6 @@ public class MainActivity extends AppCompatActivity {
     private List<PostData> allPostDataList;  // 필터링 전 전체 데이터
     private Date filterStartDate = null;
     private Date filterEndDate = null;
-    
-    // 상태 표시기 관련
-    private Handler statePollingHandler;
-    private Runnable statePollingRunnable;
-    private static final int STATE_POLLING_INTERVAL = 3000; // 3초
-    private String currentState = null; // 현재 상태 저장
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,8 +90,6 @@ public class MainActivity extends AppCompatActivity {
         switchSystemControl = findViewById(R.id.switchSystemControl);
         tvDistractedCount = findViewById(R.id.tvDistractedCount);
         tvFocusTime = findViewById(R.id.tvFocusTime);
-        stateIndicatorCircle = findViewById(R.id.stateIndicatorCircle);
-        stateIndicatorText = findViewById(R.id.stateIndicatorText);
         
         // Pull-to-Refresh 설정
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -117,9 +104,6 @@ public class MainActivity extends AppCompatActivity {
         
         // 앱 시작 시 서버 상태 확인
         checkSystemStatus();
-        
-        // 상태 Polling Handler 초기화
-        statePollingHandler = new Handler(Looper.getMainLooper());
         
         // 저장된 데이터가 있으면 복원
         if (savedInstanceState != null && postDataList != null && !postDataList.isEmpty()) {
@@ -141,17 +125,12 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Log.w(TAG, "onResume: postDataList가 null이거나 비어있음");
         }
-        
-        // 상태 Polling 시작
-        startStatePolling();
     }
     
     @Override
     protected void onPause() {
         super.onPause();
         Log.d(TAG, "onPause 호출됨");
-        // 상태 Polling 중지
-        stopStatePolling();
     }
     
     @Override
@@ -164,8 +143,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "onDestroy 호출됨");
-        // 상태 Polling 중지
-        stopStatePolling();
     }
     
     private void restoreRecyclerView() {
@@ -415,10 +392,6 @@ public class MainActivity extends AppCompatActivity {
             try {
                 String apiUrl = urls[0];
                 String token = "e79ef213eae997b907ae570486118e9486e51662";
-                // 정렬 파라미터 추가: created_date 기준 내림차순 (최신순)
-                if (!apiUrl.contains("ordering")) {
-                    apiUrl += (apiUrl.contains("?") ? "&" : "?") + "ordering=-created_date";
-                }
                 URL urlAPI = new URL(apiUrl);
                 HttpURLConnection conn = (HttpURLConnection) urlAPI.openConnection();
                 conn.setRequestProperty("Authorization", "Token " + token);
@@ -767,194 +740,5 @@ public class MainActivity extends AppCompatActivity {
                 switchSystemControl.setChecked(!switchSystemControl.isChecked());
             }
         }
-    }
-    
-    // 상태 Polling 관련 메서드들
-    private void startStatePolling() {
-        if (statePollingRunnable != null) {
-            statePollingHandler.removeCallbacks(statePollingRunnable);
-        }
-        
-        statePollingRunnable = new Runnable() {
-            @Override
-            public void run() {
-                checkCurrentState();
-                // 3초 후 다시 실행
-                statePollingHandler.postDelayed(this, STATE_POLLING_INTERVAL);
-            }
-        };
-        
-        // 즉시 한 번 실행
-        statePollingHandler.post(statePollingRunnable);
-        Log.d(TAG, "상태 Polling 시작");
-    }
-    
-    private void stopStatePolling() {
-        if (statePollingRunnable != null) {
-            statePollingHandler.removeCallbacks(statePollingRunnable);
-            statePollingRunnable = null;
-            Log.d(TAG, "상태 Polling 중지");
-        }
-    }
-    
-    private void checkCurrentState() {
-        // 백그라운드에서 최신 Post 상태 확인
-        new AsyncTask<Void, Void, String>() {
-            @Override
-            protected String doInBackground(Void... voids) {
-                try {
-                    String token = "e79ef213eae997b907ae570486118e9486e51662";
-                    // 정렬 파라미터 추가: created_date 기준 내림차순 (최신순)
-                    URL urlAPI = new URL(site_url + "/api_root/Post/?ordering=-created_date");
-                    HttpURLConnection conn = (HttpURLConnection) urlAPI.openConnection();
-                    conn.setRequestProperty("Authorization", "Token " + token);
-                    conn.setRequestMethod("GET");
-                    conn.setConnectTimeout(3000);
-                    conn.setReadTimeout(3000);
-                    
-                    int responseCode = conn.getResponseCode();
-                    if (responseCode == HttpURLConnection.HTTP_OK) {
-                        InputStream is = conn.getInputStream();
-                        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-                        StringBuilder result = new StringBuilder();
-                        String line;
-                        while ((line = reader.readLine()) != null) {
-                            result.append(line);
-                        }
-                        is.close();
-                        
-                        JSONObject jsonResponse = new JSONObject(result.toString());
-                        JSONArray results;
-                        if (jsonResponse.has("results")) {
-                            results = jsonResponse.getJSONArray("results");
-                        } else {
-                            results = new JSONArray(result.toString());
-                        }
-                        
-                        // 최신 Post 찾기 (created_date 기준으로 정렬)
-                        if (results.length() > 0) {
-                            Log.d(TAG, "상태 확인: 총 " + results.length() + "개 Post 확인 중");
-                            JSONObject latestPost = null;
-                            Date latestDate = null;
-                            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
-                            
-                            // 모든 Post를 확인하여 가장 최신 항목 찾기
-                            for (int i = 0; i < results.length(); i++) {
-                                JSONObject post = results.getJSONObject(i);
-                                String title = post.optString("title", "");
-                                String createdDateStr = post.optString("created_date", "");
-                                
-                                Log.d(TAG, "Post[" + i + "] - title: " + title + ", date: " + createdDateStr);
-                                
-                                // Focus, Distracted, Away 상태만 확인
-                                if ("Focus".equals(title) || "Distracted".equals(title) || "Away".equals(title)) {
-                                    if (!createdDateStr.isEmpty()) {
-                                        try {
-                                            // ISO 8601 형식 파싱
-                                            String dateStr = createdDateStr.split("\\+")[0].split("\\.")[0];
-                                            Date postDate = sdf.parse(dateStr);
-                                            
-                                            Log.d(TAG, "상태 Post 발견 - title: " + title + ", 파싱된 날짜: " + postDate);
-                                            
-                                            // 최신 날짜인지 확인
-                                            if (latestDate == null || postDate.after(latestDate)) {
-                                                if (latestDate != null) {
-                                                    Log.d(TAG, "더 최신 항목 발견: " + title + " (" + postDate + " > " + latestDate + ")");
-                                                }
-                                                latestDate = postDate;
-                                                latestPost = post;
-                                            } else {
-                                                Log.d(TAG, "이전 항목이 더 최신: " + latestPost.optString("title") + " (" + latestDate + " > " + postDate + ")");
-                                            }
-                                        } catch (ParseException e) {
-                                            Log.w(TAG, "날짜 파싱 실패: " + createdDateStr, e);
-                                        }
-                                    }
-                                }
-                            }
-                            
-                            if (latestPost != null) {
-                                String title = latestPost.optString("title", "");
-                                Log.d(TAG, "최신 상태 확인: " + title + " (날짜: " + latestDate + ")");
-                                return title;
-                            } else {
-                                Log.w(TAG, "상태 확인: 유효한 상태 Post 없음");
-                            }
-                        } else {
-                            Log.w(TAG, "상태 확인: Post 데이터 없음");
-                        }
-                    } else {
-                        Log.w(TAG, "상태 확인: Post 데이터 없음");
-                    }
-                } catch (java.net.SocketTimeoutException e) {
-                    Log.e(TAG, "상태 확인 실패: 타임아웃", e);
-                } catch (java.net.UnknownHostException e) {
-                    Log.e(TAG, "상태 확인 실패: 호스트를 찾을 수 없음", e);
-                } catch (IOException e) {
-                    Log.e(TAG, "상태 확인 실패: 네트워크 오류", e);
-                } catch (JSONException e) {
-                    Log.e(TAG, "상태 확인 실패: JSON 파싱 오류", e);
-                } catch (Exception e) {
-                    Log.e(TAG, "상태 확인 실패: 기타 오류", e);
-                }
-                return null;
-            }
-            
-            @Override
-            protected void onPostExecute(String state) {
-                Log.d(TAG, "상태 Polling 결과 - 현재 상태: " + currentState + ", 새 상태: " + state);
-                
-                // 상태가 변경되었을 때만 업데이트
-                if (state != null) {
-                    if (!state.equals(currentState)) {
-                        currentState = state;
-                        updateStateIndicator(state);
-                        Log.d(TAG, "상태 업데이트: " + state);
-                    } else {
-                        Log.d(TAG, "상태 변경 없음: " + state);
-                    }
-                } else {
-                    // 상태 없음 또는 오류
-                    if (currentState == null) {
-                        updateStateIndicator(null);
-                        Log.d(TAG, "상태 없음 - 기본 상태 표시");
-                    } else {
-                        Log.d(TAG, "상태 확인 실패 - 이전 상태 유지: " + currentState);
-                    }
-                }
-            }
-        }.execute();
-    }
-    
-    private void updateStateIndicator(String state) {
-        if (stateIndicatorCircle == null || stateIndicatorText == null) {
-            return;
-        }
-        
-        int color;
-        String text;
-        
-        if ("Focus".equals(state)) {
-            color = 0xFF4CAF50; // 초록색
-            text = "집중";
-        } else if ("Distracted".equals(state)) {
-            color = 0xFFF44336; // 빨간색
-            text = "딴짓";
-        } else if ("Away".equals(state)) {
-            color = 0xFF9E9E9E; // 회색
-            text = "부재";
-        } else {
-            color = 0xFF9E9E9E; // 회색 (상태 없음)
-            text = "상태 확인 중...";
-        }
-        
-        // 원형 View의 배경색 변경
-        GradientDrawable drawable = new GradientDrawable();
-        drawable.setShape(GradientDrawable.OVAL);
-        drawable.setColor(color);
-        stateIndicatorCircle.setBackground(drawable);
-        
-        // 텍스트 업데이트
-        stateIndicatorText.setText(text);
     }
 }
