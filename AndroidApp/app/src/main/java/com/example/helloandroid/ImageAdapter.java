@@ -11,7 +11,10 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImageViewHolder> {
     private List<PostData> postList;
@@ -30,9 +33,13 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImageViewHol
     
     @Override
     public void onBindViewHolder(ImageViewHolder holder, int position) {
-        // 해당 위치의 이미지를 뷰에 설정
+        // 해당 위치의 데이터를 뷰에 설정
         PostData post = postList.get(position);
-        holder.imageView.setImageBitmap(post.getBitmap());
+        
+        // ImageView 숨기기 (이미지 다운로드 제거)
+        if (holder.imageView != null) {
+            holder.imageView.setVisibility(View.GONE);
+        }
         
         // 상태별 색상 구분
         String title = post.getTitle();
@@ -45,6 +52,16 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImageViewHol
                     holder.statusText.setText("집중");
                     holder.statusText.setTextColor(Color.parseColor("#388E3C")); // 진한 초록색
                 }
+                // 시간 정보 표시
+                if (holder.timeText != null) {
+                    Date createdDate = post.getCreatedDate();
+                    if (createdDate != null) {
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+                        holder.timeText.setText(sdf.format(createdDate));
+                    } else {
+                        holder.timeText.setText("");
+                    }
+                }
             } else if ("Distracted".equals(title)) {
                 // Distracted: 빨간색 카드 + 썸네일 강조
                 holder.itemView.setBackgroundColor(Color.parseColor("#FFEBEE")); // 연한 빨간색
@@ -52,6 +69,16 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImageViewHol
                 if (holder.statusText != null) {
                     holder.statusText.setText("딴짓");
                     holder.statusText.setTextColor(Color.parseColor("#D32F2F")); // 진한 빨간색
+                }
+                // 시간 정보 표시
+                if (holder.timeText != null) {
+                    Date createdDate = post.getCreatedDate();
+                    if (createdDate != null) {
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+                        holder.timeText.setText(sdf.format(createdDate));
+                    } else {
+                        holder.timeText.setText("");
+                    }
                 }
             } else if ("Away".equals(title)) {
                 // Away: 회색
@@ -61,6 +88,16 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImageViewHol
                     holder.statusText.setText("부재");
                     holder.statusText.setTextColor(Color.parseColor("#757575")); // 회색
                 }
+                // 시간 정보 표시
+                if (holder.timeText != null) {
+                    Date createdDate = post.getCreatedDate();
+                    if (createdDate != null) {
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+                        holder.timeText.setText(sdf.format(createdDate));
+                    } else {
+                        holder.timeText.setText("");
+                    }
+                }
             } else {
                 // 기본 색상
                 holder.itemView.setBackgroundColor(Color.WHITE);
@@ -69,23 +106,20 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImageViewHol
                     holder.statusText.setText(title);
                     holder.statusText.setTextColor(Color.BLACK);
                 }
+                // 시간 정보 표시
+                if (holder.timeText != null) {
+                    Date createdDate = post.getCreatedDate();
+                    if (createdDate != null) {
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+                        holder.timeText.setText(sdf.format(createdDate));
+                    } else {
+                        holder.timeText.setText("");
+                    }
+                }
             }
         }
         
-        // 클릭 리스너 추가
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(v.getContext(), ImageDetailActivity.class);
-                // Bitmap 대신 URL과 메타데이터만 전달 (크기 제한 회피)
-                intent.putExtra("imageUrl", post.getImageUrl());
-                intent.putExtra("title", post.getTitle());
-                intent.putExtra("text", post.getText());
-                // Bitmap은 static 변수로 임시 저장 (메모리 상에 있으므로 재다운로드 불필요)
-                ImageDetailActivity.setTempBitmap(post.getBitmap());
-                v.getContext().startActivity(intent);
-            }
-        });
+        // 클릭 리스너 제거 (이미지 상세 보기 불필요)
     }
     
     @Override
@@ -96,11 +130,13 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImageViewHol
     public static class ImageViewHolder extends RecyclerView.ViewHolder {
         ImageView imageView;
         TextView statusText;
+        TextView timeText;
         
         public ImageViewHolder(View itemView) {
             super(itemView);
             imageView = itemView.findViewById(R.id.imageViewItem); // item_image.xml에 있는 ImageView
             statusText = itemView.findViewById(R.id.statusText); // 상태 텍스트 (있으면)
+            timeText = itemView.findViewById(R.id.timeText); // 시간 텍스트 (있으면)
         }
     }
 }

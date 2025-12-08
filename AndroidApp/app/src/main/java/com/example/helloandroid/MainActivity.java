@@ -320,8 +320,11 @@ public class MainActivity extends AppCompatActivity {
             ImageAdapter adapter = new ImageAdapter(postDataList);
             recyclerView.setLayoutManager(new LinearLayoutManager(this));
             recyclerView.setAdapter(adapter);
-            textView.setText("필터링된 이미지: " + postDataList.size() + "개");
+            textView.setText("필터링된 데이터: " + postDataList.size() + "개");
         }
+        
+        // 대시보드 업데이트 (필터 적용 후)
+        updateDashboard();
     }
     
     @Override
@@ -380,7 +383,7 @@ public class MainActivity extends AppCompatActivity {
         protected void onPreExecute() {
             super.onPreExecute();
             progressBar.setVisibility(View.VISIBLE);
-            textView.setText("이미지를 불러오는 중...");
+            textView.setText("데이터를 불러오는 중...");
         }
         
         @Override
@@ -416,8 +419,9 @@ public class MainActivity extends AppCompatActivity {
                         aryJson = new JSONArray(strJson);
                     }
                     
-                    // 배열 내 모든 이미지 다운로드 및 메타데이터 저장
+                    // 배열 내 메타데이터만 파싱 (이미지 다운로드 제거)
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
+                    Log.d(TAG, "데이터 로딩 시작. 총 " + aryJson.length() + "개 항목");
                     for (int i = 0; i < aryJson.length(); i++) {
                         post_json = (JSONObject) aryJson.get(i);
                         imageUrl = post_json.optString("image", null);
@@ -431,23 +435,18 @@ public class MainActivity extends AppCompatActivity {
                                 // ISO 8601 형식 파싱 (예: "2025-11-17T23:27:30.369366+09:00")
                                 String dateStr = createdDateStr.split("\\+")[0].split("\\.")[0]; // 타임존 제거
                                 createdDate = sdf.parse(dateStr);
+                                Log.d(TAG, String.format("Post 파싱 성공 - title: %s, date: %s", title, dateStr));
                             } catch (ParseException e) {
+                                Log.e(TAG, "날짜 파싱 실패: " + createdDateStr, e);
                                 e.printStackTrace();
                             }
                         }
                         
-                        if (imageUrl != null && !imageUrl.equals("null") && !imageUrl.isEmpty()) {
-                            URL myImageUrl = new URL(imageUrl);
-                            conn = (HttpURLConnection) myImageUrl.openConnection();
-                            InputStream imgStream = conn.getInputStream();
-                            Bitmap imageBitmap = BitmapFactory.decodeStream(imgStream);
-                            if (imageBitmap != null) {
-                                PostData postData = new PostData(imageBitmap, title, text, imageUrl, createdDate);
-                                postList.add(postData); // 포스트 데이터 리스트에 추가
-                            }
-                            imgStream.close();
-                        }
+                        // 이미지 다운로드 없이 메타데이터만으로 PostData 생성 (Bitmap은 null)
+                        PostData postData = new PostData(null, title, text, imageUrl, createdDate);
+                        postList.add(postData);
                     }
+                    Log.d(TAG, "데이터 로딩 완료. 총 " + postList.size() + "개 Post 생성");
                 }
             } catch (IOException | JSONException e) {
                 e.printStackTrace();
@@ -463,10 +462,10 @@ public class MainActivity extends AppCompatActivity {
             postDataList = posts;
             Log.d(TAG, "CloadImage 완료. 데이터 개수: " + (posts != null ? posts.size() : 0));
             if (posts == null || posts.isEmpty()) {
-                textView.setText("불러올 이미지가 없습니다.");
-                Log.w(TAG, "이미지 데이터가 비어있음");
+                textView.setText("불러올 데이터가 없습니다.");
+                Log.w(TAG, "데이터가 비어있음");
             } else {
-                textView.setText("이미지 로드 성공! (" + posts.size() + "개)");
+                textView.setText("데이터 로드 성공! (" + posts.size() + "개)");
                 RecyclerView recyclerView = findViewById(R.id.recyclerView);
                 if (recyclerView != null) {
                     ImageAdapter adapter = new ImageAdapter(posts);
@@ -592,33 +591,63 @@ public class MainActivity extends AppCompatActivity {
     }
     
     private void updateDashboard() {
-        // 대시보드 업데이트: 오늘 날짜 기준 Distracted 카운트
+        // 대시보드 업데이트: 필터 적용 시 필터 범위, 필터 없으면 오늘 날짜 기준
         if (allPostDataList == null) {
             allPostDataList = postDataList != null ? new ArrayList<>(postDataList) : new ArrayList<>();
         }
         
-        Calendar today = Calendar.getInstance();
-        today.set(Calendar.HOUR_OF_DAY, 0);
-        today.set(Calendar.MINUTE, 0);
-        today.set(Calendar.SECOND, 0);
-        today.set(Calendar.MILLISECOND, 0);
+        List<PostData> dataToAnalyze;
+        
+        // 필터가 적용된 경우 필터링된 데이터 사용, 없으면 오늘 날짜 기준
+        if (filterStartDate != null || filterEndDate != null) {
+            // 필터 적용된 데이터 기준
+            dataToAnalyze = postDataList != null ? postDataList : new ArrayList<>();
+            Log.d(TAG, "대시보드: 필터 범위 기준으로 통계 계산. 데이터 개수: " + dataToAnalyze.size());
+        } else {
+            // 오늘 날짜 기준
+            Calendar today = Calendar.getInstance();
+            today.set(Calendar.HOUR_OF_DAY, 0);
+            today.set(Calendar.MINUTE, 0);
+            today.set(Calendar.SECOND, 0);
+            today.set(Calendar.MILLISECOND, 0);
+            Date todayStart = today.getTime();
+            
+            Calendar tomorrow = Calendar.getInstance();
+            tomorrow.set(Calendar.HOUR_OF_DAY, 0);
+            tomorrow.set(Calendar.MINUTE, 0);
+            tomorrow.set(Calendar.SECOND, 0);
+            tomorrow.set(Calendar.MILLISECOND, 0);
+            tomorrow.add(Calendar.DAY_OF_MONTH, 1);
+            Date tomorrowStart = tomorrow.getTime();
+            
+            dataToAnalyze = new ArrayList<>();
+            for (PostData post : allPostDataList) {
+                Date postDate = post.getCreatedDate();
+                // 오늘 포함: postDate >= todayStart && postDate < tomorrowStart
+                if (postDate != null && 
+                    postDate.compareTo(todayStart) >= 0 && 
+                    postDate.before(tomorrowStart)) {
+                    dataToAnalyze.add(post);
+                }
+            }
+            Log.d(TAG, "대시보드: 오늘 날짜 기준으로 통계 계산. 데이터 개수: " + dataToAnalyze.size());
+        }
         
         int distractedCount = 0;
         int focusCount = 0;
         int totalCount = 0;
         
-        for (PostData post : allPostDataList) {
-            Date postDate = post.getCreatedDate();
-            if (postDate != null && postDate.after(today.getTime())) {
-                totalCount++;
-                String title = post.getTitle();
-                if ("Distracted".equals(title)) {
-                    distractedCount++;
-                } else if ("Focus".equals(title)) {
-                    focusCount++;
-                }
+        for (PostData post : dataToAnalyze) {
+            totalCount++;
+            String title = post.getTitle();
+            if ("Distracted".equals(title)) {
+                distractedCount++;
+            } else if ("Focus".equals(title)) {
+                focusCount++;
             }
         }
+        
+        Log.d(TAG, String.format("대시보드 통계 - 전체: %d, 딴짓: %d, 집중: %d", totalCount, distractedCount, focusCount));
         
         tvDistractedCount.setText(String.valueOf(distractedCount));
         

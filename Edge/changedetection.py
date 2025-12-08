@@ -35,16 +35,26 @@ class ChangeDetection:
         person_detected = False
         phone_detected = False
         
-        # names 리스트에서 인덱스 찾기 (다른 데이터셋 대비)
+        # names 딕셔너리에서 클래스 ID 찾기 (다른 데이터셋 대비)
         person_id = None
         phone_id = None
         
-        for idx, name in enumerate(names):
-            name_lower = name.lower()
-            if 'person' in name_lower:
-                person_id = idx
-            elif 'cell phone' in name_lower or 'phone' in name_lower:
-                phone_id = idx
+        # names가 딕셔너리인 경우 (YOLOv5 기본)
+        if isinstance(names, dict):
+            for class_id, name in names.items():
+                name_lower = str(name).lower()
+                if 'person' in name_lower:
+                    person_id = class_id
+                elif 'cell phone' in name_lower or 'phone' in name_lower:
+                    phone_id = class_id
+        # names가 리스트인 경우 (다른 형태의 데이터셋)
+        else:
+            for idx, name in enumerate(names):
+                name_lower = str(name).lower()
+                if 'person' in name_lower:
+                    person_id = idx
+                elif 'cell phone' in name_lower or 'phone' in name_lower:
+                    phone_id = idx
         
         # COCO 데이터셋의 경우 인덱스가 클래스 ID와 일치하므로 직접 사용
         # 하지만 다른 데이터셋을 위해 names에서 찾은 인덱스도 사용
@@ -53,12 +63,19 @@ class ChangeDetection:
         if phone_id is None:
             phone_id = PHONE_CLASS_ID if PHONE_CLASS_ID < len(detected_current) else None
         
-        # 감지 여부 확인
-        if person_id is not None and person_id < len(detected_current):
-            person_detected = (detected_current[person_id] == 1)
-        
-        if phone_id is not None and phone_id < len(detected_current):
-            phone_detected = (detected_current[phone_id] == 1)
+        # 감지 여부 확인 (detected_current는 클래스 ID를 인덱스로 하는 리스트)
+        if isinstance(detected_current, list):
+            if person_id is not None and person_id < len(detected_current):
+                person_detected = (detected_current[person_id] == 1)
+            
+            if phone_id is not None and phone_id < len(detected_current):
+                phone_detected = (detected_current[phone_id] == 1)
+        else:
+            # detected_current가 딕셔너리인 경우 (다른 형태의 데이터셋)
+            if person_id is not None:
+                person_detected = (detected_current.get(person_id, 0) == 1)
+            if phone_id is not None:
+                phone_detected = (detected_current.get(phone_id, 0) == 1)
         
         # 상태 판단
         if person_detected and phone_detected:
