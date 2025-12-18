@@ -1,6 +1,16 @@
 // 모달 기능 구현
+console.log('modal.js 스크립트 로드됨');
+
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOMContentLoaded 이벤트 발생');
+    
     const modal = document.getElementById('postModal');
+    if (!modal) {
+        console.error('postModal을 찾을 수 없습니다!');
+        return;
+    }
+    console.log('postModal 찾음');
+    
     const modalOverlay = modal.querySelector('.modal-overlay');
     const modalClose = modal.querySelector('.modal-close');
     const modalTitle = document.getElementById('modalTitle');
@@ -99,10 +109,14 @@ document.addEventListener('DOMContentLoaded', function() {
     modalOverlay.addEventListener('click', closeModal);
     
     // 모달 콘텐츠 클릭 시 이벤트 전파 방지 (모달이 닫히지 않도록)
+    // 단, 삭제 버튼 클릭은 제외
     const modalContent = modal.querySelector('.modal-content');
     if (modalContent) {
         modalContent.addEventListener('click', function(event) {
-            event.stopPropagation();
+            // 삭제 버튼이나 그 자식 요소가 아닌 경우에만 전파 방지
+            if (!event.target.closest('#modalDeleteBtn')) {
+                event.stopPropagation();
+            }
         });
     }
 
@@ -113,11 +127,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // 삭제 버튼 클릭 이벤트
-    if (modalDeleteBtn) {
-        modalDeleteBtn.addEventListener('click', function(event) {
-            event.preventDefault(); // 기본 동작 방지
-            event.stopPropagation(); // 이벤트 버블링 방지
+    // 삭제 버튼 클릭 이벤트 - 이벤트 위임 사용
+    // 모달 자체에 이벤트 리스너를 등록하여 동적으로 처리
+    modal.addEventListener('click', function(event) {
+        // 삭제 버튼 클릭인지 확인
+        if (event.target && event.target.id === 'modalDeleteBtn') {
+            event.preventDefault();
+            event.stopPropagation();
             
             console.log('삭제 버튼 클릭됨, currentPostId:', currentPostId);
             
@@ -136,8 +152,34 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('삭제 API 호출 시작, postId:', currentPostId);
             // 삭제 API 호출
             deletePost(currentPostId);
+        }
+    });
+    
+    // 삭제 버튼 직접 이벤트 리스너도 추가 (이중 보험)
+    if (modalDeleteBtn) {
+        modalDeleteBtn.addEventListener('click', function(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            
+            console.log('삭제 버튼 직접 클릭 이벤트 발생, currentPostId:', currentPostId);
+            
+            if (!currentPostId) {
+                alert('삭제할 항목을 찾을 수 없습니다.');
+                console.error('currentPostId가 null입니다.');
+                return;
+            }
+
+            // 삭제 확인
+            if (!confirm('정말로 이 활동 기록을 삭제하시겠습니까?')) {
+                console.log('삭제 취소됨');
+                return;
+            }
+
+            console.log('삭제 API 호출 시작, postId:', currentPostId);
+            // 삭제 API 호출
+            deletePost(currentPostId);
         });
-        console.log('삭제 버튼 이벤트 리스너 등록 완료');
+        console.log('삭제 버튼 직접 이벤트 리스너 등록 완료');
     } else {
         console.error('삭제 버튼이 없어 이벤트 리스너를 등록할 수 없습니다.');
     }
