@@ -1,38 +1,115 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="12dp"
-    android:background="@android:color/white">
+    android:layout_marginHorizontal="@dimen/spacing_medium"
+    android:layout_marginVertical="@dimen/item_margin_vertical"
+    app:cardCornerRadius="@dimen/card_corner_radius"
+    app:cardElevation="@dimen/card_elevation"
+    app:cardBackgroundColor="@color/card_background"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?android:attr/selectableItemBackground">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:padding="@dimen/item_padding"
         android:gravity="center_vertical">
+
+        <!-- 상태 아이콘 -->
         <TextView
-            android:id="@+id/statusText"
+            android:id="@+id/statusIcon"
+            android:layout_width="@dimen/item_icon_size"
+            android:layout_height="@dimen/item_icon_size"
+            android:text="🎯"
+            android:textSize="@dimen/item_icon_size"
+            android:gravity="center" />
+
+        <!-- 썸네일 이미지 (있는 경우) -->
+        <ImageView
+            android:id="@+id/imageViewItem"
+            android:layout_width="@dimen/item_thumbnail_size"
+            android:layout_height="@dimen/item_thumbnail_size"
+            android:layout_marginStart="@dimen/spacing_medium"
+            android:scaleType="centerCrop"
+            android:visibility="gone"
+            android:background="@drawable/image_placeholder" />
+
+        <!-- 텍스트 정보 -->
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text=""
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:padding="4dp" />
+            android:orientation="vertical"
+            android:layout_marginStart="@dimen/spacing_medium">
+
+            <!-- 상태 및 시간 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="@dimen/spacing_small">
+
+                <TextView
+                    android:id="@+id/statusText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:textSize="@dimen/text_size_medium"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_primary" />
+
+                <View
+                    android:layout_width="4dp"
+                    android:layout_height="4dp"
+                    android:layout_marginHorizontal="@dimen/spacing_small"
+                    android:background="@color/text_hint"
+                    android:backgroundTint="@color/text_hint" />
+
+                <TextView
+                    android:id="@+id/timeText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text=""
+                    android:textSize="@dimen/text_size_xsmall"
+                    android:textColor="@color/text_secondary" />
+            </LinearLayout>
+
+            <!-- 내용 미리보기 -->
+            <TextView
+                android:id="@+id/textPreview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textSize="@dimen/text_size_small"
+                android:textColor="@color/text_secondary"
+                android:maxLines="2"
+                android:ellipsize="end" />
+
+            <!-- 이미지 표시 인디케이터 -->
+            <TextView
+                android:id="@+id/imageIndicator"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📷 이미지 있음"
+                android:textSize="@dimen/text_size_xsmall"
+                android:textColor="@color/primary"
+                android:layout_marginTop="@dimen/spacing_small"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <!-- 화살표 아이콘 -->
         <TextView
-            android:id="@+id/timeText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text=""
-            android:textSize="12sp"
-            android:textColor="#666666"
-            android:padding="4dp" />
+            android:text="›"
+            android:textSize="24sp"
+            android:textColor="@color/text_hint"
+            android:layout_marginStart="@dimen/spacing_small" />
     </LinearLayout>
-    <ImageView
-        android:id="@+id/imageViewItem"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:visibility="gone"
-        android:scaleType="centerCrop" />
-</LinearLayout>
-
+</androidx.cardview.widget.CardView>

@@ -13,6 +13,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -62,6 +63,12 @@ public class MainActivity extends AppCompatActivity {
     Switch switchSystemControl;
     TextView tvDistractedCount;
     TextView tvFocusTime;
+    TextView tvAwayCount;
+    TextView tvTotalCount;
+    Button btnFilterToday;
+    Button btnFilterWeek;
+    Button btnFilterMonth;
+    Button btnFilterAll;
     // 에뮬레이터: 10.0.2.2, 실제 기기: PC의 IP 주소로 변경 필요 (예: 192.168.0.5)
     // String site_url = "http://10.0.2.2:8000";
     String site_url = "https://sodlfmag.pythonanywhere.com";
@@ -80,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
     private List<PostData> allPostDataList;  // 필터링 전 전체 데이터
     private Date filterStartDate = null;
     private Date filterEndDate = null;
+    private String currentQuickFilter = "ALL"; // TODAY, WEEK, MONTH, ALL
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,6 +100,15 @@ public class MainActivity extends AppCompatActivity {
         switchSystemControl = findViewById(R.id.switchSystemControl);
         tvDistractedCount = findViewById(R.id.tvDistractedCount);
         tvFocusTime = findViewById(R.id.tvFocusTime);
+        tvAwayCount = findViewById(R.id.tvAwayCount);
+        tvTotalCount = findViewById(R.id.tvTotalCount);
+        btnFilterToday = findViewById(R.id.btnFilterToday);
+        btnFilterWeek = findViewById(R.id.btnFilterWeek);
+        btnFilterMonth = findViewById(R.id.btnFilterMonth);
+        btnFilterAll = findViewById(R.id.btnFilterAll);
+        
+        // 초기 필터 버튼 스타일 설정 (전체 선택)
+        updateFilterButtonStyles();
         
         // Pull-to-Refresh 설정
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -152,7 +169,7 @@ public class MainActivity extends AppCompatActivity {
         RecyclerView recyclerView = findViewById(R.id.recyclerView);
         if (recyclerView != null && postDataList != null && !postDataList.isEmpty()) {
             Log.d(TAG, "RecyclerView 복원 중. 데이터 개수: " + postDataList.size());
-            ImageAdapter adapter = new ImageAdapter(postDataList);
+            ImageAdapter adapter = new ImageAdapter(postDataList, site_url);
             recyclerView.setLayoutManager(new LinearLayoutManager(this));
             recyclerView.setAdapter(adapter);
             textView.setText("이미지 로드 성공! (" + postDataList.size() + "개)");
@@ -187,12 +204,22 @@ public class MainActivity extends AppCompatActivity {
     }
     
     public void onClickDownload(View v) {
+        // 이미 실행 중이면 무시
         if (taskDownload != null && taskDownload.getStatus() == AsyncTask.Status.RUNNING) {
-            taskDownload.cancel(true);
+            Log.d(TAG, "동기화가 이미 실행 중입니다. 무시합니다.");
+            Toast.makeText(getApplicationContext(), "동기화가 이미 실행 중입니다", Toast.LENGTH_SHORT).show();
+            return;
         }
+        
+        // SwipeRefreshLayout이 활성화되어 있으면 무시
+        if (swipeRefreshLayout != null && swipeRefreshLayout.isRefreshing()) {
+            Log.d(TAG, "SwipeRefresh가 이미 실행 중입니다. 무시합니다.");
+            return;
+        }
+        
         taskDownload = new CloadImage();
         taskDownload.execute(site_url + "/api_root/Post/");
-        Toast.makeText(getApplicationContext(), "Download", Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(), "동기화 중...", Toast.LENGTH_SHORT).show();
     }
     
     public void onClickUpload(View v) {
@@ -205,6 +232,115 @@ public class MainActivity extends AppCompatActivity {
     
     public void onClickFilter(View v) {
         showDateFilterDialog();
+    }
+    
+    public void onClickQuickFilter(View v) {
+        Button clickedButton = (Button) v;
+        String filterType = null;
+        
+        if (clickedButton == btnFilterToday) {
+            filterType = "TODAY";
+        } else if (clickedButton == btnFilterWeek) {
+            filterType = "WEEK";
+        } else if (clickedButton == btnFilterMonth) {
+            filterType = "MONTH";
+        } else if (clickedButton == btnFilterAll) {
+            filterType = "ALL";
+        }
+        
+        if (filterType != null) {
+            applyQuickFilter(filterType);
+        }
+    }
+    
+    private void applyQuickFilter(String filterType) {
+        currentQuickFilter = filterType;
+        
+        // 날짜 범위 필터 초기화
+        filterStartDate = null;
+        filterEndDate = null;
+        
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        
+        switch (filterType) {
+            case "TODAY":
+                // 오늘 00:00:00 ~ 23:59:59
+                filterStartDate = calendar.getTime();
+                calendar.add(Calendar.DAY_OF_MONTH, 1);
+                filterEndDate = calendar.getTime();
+                break;
+                
+            case "WEEK":
+                // 이번 주 월요일 00:00:00 ~ 일요일 23:59:59
+                int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
+                int daysFromMonday = (dayOfWeek == Calendar.SUNDAY) ? 6 : dayOfWeek - Calendar.MONDAY;
+                calendar.add(Calendar.DAY_OF_MONTH, -daysFromMonday);
+                filterStartDate = calendar.getTime();
+                calendar.add(Calendar.DAY_OF_MONTH, 7);
+                filterEndDate = calendar.getTime();
+                break;
+                
+            case "MONTH":
+                // 이번 달 1일 00:00:00 ~ 마지막 날 23:59:59
+                calendar.set(Calendar.DAY_OF_MONTH, 1);
+                filterStartDate = calendar.getTime();
+                calendar.add(Calendar.MONTH, 1);
+                filterEndDate = calendar.getTime();
+                break;
+                
+            case "ALL":
+                // 필터 없음
+                filterStartDate = null;
+                filterEndDate = null;
+                break;
+        }
+        
+        // 필터 버튼 스타일 업데이트
+        updateFilterButtonStyles();
+        
+        // 필터 적용
+        applyDateFilter();
+    }
+    
+    private void updateFilterButtonStyles() {
+        // 모든 버튼을 기본 스타일로 설정
+        btnFilterToday.setBackgroundResource(R.drawable.filter_button_unselected);
+        btnFilterToday.setTextColor(getResources().getColor(R.color.filter_text_unselected));
+        
+        btnFilterWeek.setBackgroundResource(R.drawable.filter_button_unselected);
+        btnFilterWeek.setTextColor(getResources().getColor(R.color.filter_text_unselected));
+        
+        btnFilterMonth.setBackgroundResource(R.drawable.filter_button_unselected);
+        btnFilterMonth.setTextColor(getResources().getColor(R.color.filter_text_unselected));
+        
+        btnFilterAll.setBackgroundResource(R.drawable.filter_button_unselected);
+        btnFilterAll.setTextColor(getResources().getColor(R.color.filter_text_unselected));
+        
+        // 선택된 버튼만 하이라이트
+        Button selectedButton = null;
+        switch (currentQuickFilter) {
+            case "TODAY":
+                selectedButton = btnFilterToday;
+                break;
+            case "WEEK":
+                selectedButton = btnFilterWeek;
+                break;
+            case "MONTH":
+                selectedButton = btnFilterMonth;
+                break;
+            case "ALL":
+                selectedButton = btnFilterAll;
+                break;
+        }
+        
+        if (selectedButton != null) {
+            selectedButton.setBackgroundResource(R.drawable.filter_button_selected);
+            selectedButton.setTextColor(getResources().getColor(R.color.filter_text_selected));
+        }
     }
     
     private void showDateFilterDialog() {
@@ -280,6 +416,8 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int which) {
                 filterStartDate = null;
                 filterEndDate = null;
+                currentQuickFilter = "ALL";
+                updateFilterButtonStyles();
                 applyDateFilter();
             }
         });
@@ -322,7 +460,7 @@ public class MainActivity extends AppCompatActivity {
         // RecyclerView 업데이트
         RecyclerView recyclerView = findViewById(R.id.recyclerView);
         if (recyclerView != null && postDataList != null) {
-            ImageAdapter adapter = new ImageAdapter(postDataList);
+            ImageAdapter adapter = new ImageAdapter(postDataList, site_url);
             recyclerView.setLayoutManager(new LinearLayoutManager(this));
             recyclerView.setAdapter(adapter);
             Log.d(TAG, "applyDateFilter: RecyclerView 업데이트 완료. 데이터 개수: " + postDataList.size());
@@ -500,6 +638,13 @@ public class MainActivity extends AppCompatActivity {
                         String text = post_json.optString("text", "");
                         String createdDateStr = post_json.optString("created_date", "");
                         
+                        // 이미지 URL 로깅
+                        if (imageUrl != null && !imageUrl.isEmpty()) {
+                            Log.d(TAG, String.format("Post[%d] - title: %s, imageUrl: %s", i, title, imageUrl));
+                        } else {
+                            Log.d(TAG, String.format("Post[%d] - title: %s, imageUrl: null", i, title));
+                        }
+                        
                         Date createdDate = null;
                         if (!createdDateStr.isEmpty()) {
                             try {
@@ -610,7 +755,7 @@ public class MainActivity extends AppCompatActivity {
                     textView.setText("데이터 로드 성공! (" + posts.size() + "개)");
                     RecyclerView recyclerView = findViewById(R.id.recyclerView);
                     if (recyclerView != null) {
-                        ImageAdapter adapter = new ImageAdapter(postDataList);
+                        ImageAdapter adapter = new ImageAdapter(postDataList, site_url);
                         recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this));
                         recyclerView.setAdapter(adapter);
                         Log.d(TAG, "RecyclerView 어댑터 설정 완료. 표시할 데이터 개수: " + postDataList.size());
@@ -809,6 +954,7 @@ public class MainActivity extends AppCompatActivity {
         
         int distractedCount = 0;
         int focusCount = 0;
+        int awayCount = 0;
         int totalCount = 0;
         
         for (PostData post : dataToAnalyze) {
@@ -818,12 +964,18 @@ public class MainActivity extends AppCompatActivity {
                 distractedCount++;
             } else if ("Focus".equals(title)) {
                 focusCount++;
+            } else if ("Away".equals(title)) {
+                awayCount++;
             }
         }
         
-        Log.d(TAG, String.format("대시보드 통계 - 전체: %d, 딴짓: %d, 집중: %d", totalCount, distractedCount, focusCount));
+        Log.d(TAG, String.format("대시보드 통계 - 전체: %d, 딴짓: %d, 집중: %d, 부재: %d", 
+            totalCount, distractedCount, focusCount, awayCount));
         
+        // 각 카드 업데이트
         tvDistractedCount.setText(String.valueOf(distractedCount));
+        tvAwayCount.setText(String.valueOf(awayCount));
+        tvTotalCount.setText(String.valueOf(totalCount));
         
         // 집중 시간 비율 계산
         if (totalCount > 0) {

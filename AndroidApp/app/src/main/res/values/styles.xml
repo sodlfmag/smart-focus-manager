@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 카드 스타일 -->
+    <style name="CardStyle">
+        <item name="android:layout_margin">@dimen/card_margin</item>
+        <item name="android:padding">@dimen/card_padding</item>
+        <item name="android:background">@drawable/card_background</item>
+        <item name="cardCornerRadius">@dimen/card_corner_radius</item>
+        <item name="cardElevation">@dimen/card_elevation</item>
+    </style>
+    
+    <!-- 대시보드 카드 스타일 -->
+    <style name="DashboardCardStyle" parent="CardStyle">
+        <item name="android:layout_height">@dimen/dashboard_card_height</item>
+        <item name="android:padding">@dimen/dashboard_card_padding</item>
+    </style>
+    
+    <!-- 통계 값 텍스트 스타일 -->
+    <style name="StatValueText">
+        <item name="android:textSize">@dimen/stat_value_text_size</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/text_primary</item>
+    </style>
+    
+    <!-- 통계 레이블 텍스트 스타일 -->
+    <style name="StatLabelText">
+        <item name="android:textSize">@dimen/stat_label_text_size</item>
+        <item name="android:textColor">@color/text_secondary</item>
+    </style>
+    
+    <!-- 필터 버튼 스타일 -->
+    <style name="FilterButton">
+        <item name="android:layout_height">@dimen/filter_button_height</item>
+        <item name="android:paddingHorizontal">@dimen/filter_button_padding</item>
+        <item name="android:paddingVertical">8dp</item>
+        <item name="android:layout_margin">@dimen/filter_button_margin</item>
+        <item name="android:textSize">@dimen/text_size_small</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:gravity">center</item>
+        <item name="android:minHeight">@dimen/filter_button_height</item>
+        <item name="cornerRadius">@dimen/filter_button_corner_radius</item>
+    </style>
+    
+    <!-- 필터 버튼 선택됨 -->
+    <style name="FilterButtonSelected" parent="FilterButton">
+        <item name="android:background">@drawable/filter_button_selected</item>
+        <item name="android:textColor">@color/filter_text_selected</item>
+    </style>
+    
+    <!-- 필터 버튼 선택 안됨 -->
+    <style name="FilterButtonUnselected" parent="FilterButton">
+        <item name="android:background">@drawable/filter_button_unselected</item>
+        <item name="android:textColor">@color/filter_text_unselected</item>
+    </style>
+    
+    <!-- 리스트 아이템 카드 스타일 -->
+    <style name="ListItemCardStyle" parent="CardStyle">
+        <item name="android:layout_marginHorizontal">@dimen/spacing_medium</item>
+        <item name="android:layout_marginVertical">@dimen/item_margin_vertical</item>
+        <item name="android:padding">@dimen/item_padding</item>
+    </style>
+</resources>
+

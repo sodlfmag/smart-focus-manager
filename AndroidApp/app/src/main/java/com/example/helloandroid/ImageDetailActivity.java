@@ -21,6 +21,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -75,9 +76,17 @@ public class ImageDetailActivity extends AppCompatActivity {
             tempBitmap = null; // 메모리 해제
         } else if (imageUrl != null && !imageUrl.isEmpty()) {
             // Bitmap이 없으면 URL에서 다운로드
-            progressBar.setVisibility(View.VISIBLE);
-            new LoadImageTask().execute(imageUrl);
+            String fullUrl = getFullImageUrl(imageUrl);
+            if (fullUrl != null) {
+                progressBar.setVisibility(View.VISIBLE);
+                Log.d(TAG, "이미지 로딩 시작: " + fullUrl);
+                new LoadImageTask().execute(fullUrl);
+            } else {
+                Log.e(TAG, "이미지 URL이 유효하지 않습니다: " + imageUrl);
+                Toast.makeText(this, "이미지 URL이 유효하지 않습니다", Toast.LENGTH_SHORT).show();
+            }
         } else {
+            Log.w(TAG, "imageUrl이 null이거나 비어있습니다");
             Toast.makeText(this, "이미지를 불러올 수 없습니다", Toast.LENGTH_SHORT).show();
         }
         
@@ -110,20 +119,87 @@ public class ImageDetailActivity extends AppCompatActivity {
         });
     }
     
+    private String getFullImageUrl(String imageUrl) {
+        if (imageUrl == null || imageUrl.isEmpty()) {
+            return null;
+        }
+        
+        // 이미 절대 URL인 경우
+        if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
+            return imageUrl;
+        }
+        
+        // 상대 경로인 경우 siteUrl과 결합
+        String siteUrl = "https://sodlfmag.pythonanywhere.com";
+        String baseUrl = siteUrl;
+        if (baseUrl.endsWith("/")) {
+            baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
+        }
+        
+        if (imageUrl.startsWith("/")) {
+            return baseUrl + imageUrl;
+        } else {
+            return baseUrl + "/" + imageUrl;
+        }
+    }
+    
     // 이미지 다운로드 AsyncTask
     private class LoadImageTask extends AsyncTask<String, Void, Bitmap> {
         @Override
         protected Bitmap doInBackground(String... urls) {
+            if (urls == null || urls.length == 0 || urls[0] == null) {
+                Log.e(TAG, "이미지 URL이 null입니다");
+                return null;
+            }
+            
+            String imageUrl = urls[0];
+            Log.d(TAG, "이미지 다운로드 시작: " + imageUrl);
+            
             try {
-                URL url = new URL(urls[0]);
+                URL url = new URL(imageUrl);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setConnectTimeout(5000);
-                conn.setReadTimeout(5000);
-                InputStream inputStream = conn.getInputStream();
-                Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
-                inputStream.close();
-                return bitmap;
+                conn.setConnectTimeout(10000);
+                conn.setReadTimeout(10000);
+                conn.setRequestMethod("GET");
+                
+                int responseCode = conn.getResponseCode();
+                Log.d(TAG, "HTTP 응답 코드: " + responseCode);
+                
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    InputStream inputStream = conn.getInputStream();
+                    
+                    // 스트림을 먼저 ByteArray로 읽기
+                    ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+                    byte[] data = new byte[8192];
+                    int nRead;
+                    while ((nRead = inputStream.read(data, 0, data.length)) != -1) {
+                        buffer.write(data, 0, nRead);
+                    }
+                    buffer.flush();
+                    byte[] imageBytes = buffer.toByteArray();
+                    inputStream.close();
+                    conn.disconnect();
+                    
+                    // ByteArray에서 Bitmap 디코딩
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+                    
+                    if (bitmap != null) {
+                        Log.d(TAG, "이미지 다운로드 성공: " + bitmap.getWidth() + "x" + bitmap.getHeight());
+                    } else {
+                        Log.e(TAG, "비트맵 디코딩 실패");
+                    }
+                    return bitmap;
+                } else {
+                    Log.e(TAG, "HTTP 오류: " + responseCode);
+                    InputStream errorStream = conn.getErrorStream();
+                    if (errorStream != null) {
+                        errorStream.close();
+                    }
+                    conn.disconnect();
+                    return null;
+                }
             } catch (IOException e) {
+                Log.e(TAG, "이미지 다운로드 중 예외 발생: " + imageUrl, e);
                 e.printStackTrace();
                 return null;
             }
@@ -135,7 +211,9 @@ public class ImageDetailActivity extends AppCompatActivity {
             if (bitmap != null) {
                 imageBitmap = bitmap;
                 detailImageView.setImageBitmap(bitmap);
+                Log.d(TAG, "이미지 표시 완료");
             } else {
+                Log.e(TAG, "이미지 로드 실패");
                 Toast.makeText(ImageDetailActivity.this, "이미지 로드 실패", Toast.LENGTH_SHORT).show();
             }
         }

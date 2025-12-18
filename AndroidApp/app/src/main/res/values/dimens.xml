@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 카드 관련 -->
+    <dimen name="card_padding">16dp</dimen>
+    <dimen name="card_margin">8dp</dimen>
+    <dimen name="card_elevation">4dp</dimen>
+    <dimen name="card_corner_radius">12dp</dimen>
+    
+    <!-- 대시보드 카드 -->
+    <dimen name="dashboard_card_height">120dp</dimen>
+    <dimen name="dashboard_card_padding">16dp</dimen>
+    <dimen name="stat_icon_size">32dp</dimen>
+    <dimen name="stat_value_text_size">28sp</dimen>
+    <dimen name="stat_label_text_size">12sp</dimen>
+    
+    <!-- 리스트 아이템 -->
+    <dimen name="item_padding">16dp</dimen>
+    <dimen name="item_margin_vertical">8dp</dimen>
+    <dimen name="item_thumbnail_size">64dp</dimen>
+    <dimen name="item_icon_size">24dp</dimen>
+    
+    <!-- 필터 버튼 -->
+    <dimen name="filter_button_height">40dp</dimen>
+    <dimen name="filter_button_padding">12dp</dimen>
+    <dimen name="filter_button_margin">4dp</dimen>
+    <dimen name="filter_button_corner_radius">20dp</dimen>
+    
+    <!-- 간격 -->
+    <dimen name="spacing_small">8dp</dimen>
+    <dimen name="spacing_medium">16dp</dimen>
+    <dimen name="spacing_large">24dp</dimen>
+    <dimen name="spacing_xlarge">32dp</dimen>
+    
+    <!-- 텍스트 크기 -->
+    <dimen name="text_size_large">20sp</dimen>
+    <dimen name="text_size_medium">16sp</dimen>
+    <dimen name="text_size_small">14sp</dimen>
+    <dimen name="text_size_xsmall">12sp</dimen>
+</resources>
+
+

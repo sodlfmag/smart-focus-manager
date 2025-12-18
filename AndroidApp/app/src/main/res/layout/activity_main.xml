@@ -1,128 +1,391 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/apk/tools"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
+    android:background="@color/background"
     tools:context=".MainActivity">
-    
-    <!-- 원격 제어 스위치 -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="16dp"
-        android:background="#f0f0f0">
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="시스템 제어"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:gravity="center_vertical" />
-        <Switch
-            android:id="@+id/switchSystemControl"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="onSystemControlToggle" />
-    </LinearLayout>
-    
-    <!-- 대시보드 통계 -->
-    <LinearLayout
-        android:id="@+id/dashboardLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="16dp"
-        android:background="#e8f5e9">
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="center">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="오늘 딴짓 횟수"
-                android:textSize="12sp" />
-            <TextView
-                android:id="@+id/tvDistractedCount"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="0"
-                android:textSize="24sp"
-                android:textStyle="bold"
-                android:textColor="#d32f2f" />
-        </LinearLayout>
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:gravity="center">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="집중 시간"
-                android:textSize="12sp" />
-            <TextView
-                android:id="@+id/tvFocusTime"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="0%"
-                android:textSize="24sp"
-                android:textStyle="bold"
-                android:textColor="#388e3c" />
-        </LinearLayout>
-    </LinearLayout>
-    
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="53dp"
-        android:orientation="horizontal">
-        <Button
-            android:id="@+id/btn_load"
-            android:layout_width="0dp"
-            android:layout_height="50dp"
-            android:layout_weight="1"
-            android:onClick="onClickDownload"
-            android:text="동기화" />
-        <Button
-            android:id="@+id/btn_filter"
-            android:layout_width="0dp"
-            android:layout_height="50dp"
-            android:layout_weight="1"
-            android:onClick="onClickFilter"
-            android:text="날짜 필터" />
-    </LinearLayout>
 
-    <TextView
-        android:id="@+id/textView"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefreshLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="..." />
-    
+        android:layout_height="match_parent">
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="@dimen/spacing_medium">
+
+            <!-- 시스템 제어 카드 -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/spacing_medium"
+                app:cardCornerRadius="@dimen/card_corner_radius"
+                app:cardElevation="@dimen/card_elevation"
+                app:cardBackgroundColor="@color/card_background">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="@dimen/card_padding"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="시스템 제어"
+                        android:textSize="@dimen/text_size_medium"
+                        android:textStyle="bold"
+                        android:textColor="@color/text_primary" />
+
+                    <Switch
+                        android:id="@+id/switchSystemControl"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:onClick="onSystemControlToggle" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- 통계 대시보드 -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="통계 대시보드"
+                android:textSize="@dimen/text_size_large"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary"
+                android:layout_marginBottom="@dimen/spacing_small" />
+
+            <GridLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:columnCount="2"
+                android:rowCount="2"
+                android:layout_marginBottom="@dimen/spacing_medium">
+
+                <!-- 집중 시간 카드 -->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardFocus"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/dashboard_card_height"
+                    android:layout_columnWeight="1"
+                    android:layout_margin="@dimen/card_margin"
+                    app:cardCornerRadius="@dimen/card_corner_radius"
+                    app:cardElevation="@dimen/card_elevation"
+                    app:cardBackgroundColor="@color/focus_light">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:padding="@dimen/dashboard_card_padding"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="🎯"
+                            android:textSize="@dimen/stat_icon_size" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:layout_marginStart="@dimen/spacing_medium">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="집중 시간"
+                                style="@style/StatLabelText" />
+
+                            <TextView
+                                android:id="@+id/tvFocusTime"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0%"
+                                style="@style/StatValueText"
+                                android:textColor="@color/focus_dark" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <!-- 딴짓 횟수 카드 -->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardDistracted"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/dashboard_card_height"
+                    android:layout_columnWeight="1"
+                    android:layout_margin="@dimen/card_margin"
+                    app:cardCornerRadius="@dimen/card_corner_radius"
+                    app:cardElevation="@dimen/card_elevation"
+                    app:cardBackgroundColor="@color/distracted_light">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:padding="@dimen/dashboard_card_padding"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="📱"
+                            android:textSize="@dimen/stat_icon_size" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:layout_marginStart="@dimen/spacing_medium">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="딴짓 횟수"
+                                style="@style/StatLabelText" />
+
+                            <TextView
+                                android:id="@+id/tvDistractedCount"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0"
+                                style="@style/StatValueText"
+                                android:textColor="@color/distracted_dark" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <!-- 부재 횟수 카드 -->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardAway"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/dashboard_card_height"
+                    android:layout_columnWeight="1"
+                    android:layout_margin="@dimen/card_margin"
+                    app:cardCornerRadius="@dimen/card_corner_radius"
+                    app:cardElevation="@dimen/card_elevation"
+                    app:cardBackgroundColor="@color/away_light">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:padding="@dimen/dashboard_card_padding"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="🚶"
+                            android:textSize="@dimen/stat_icon_size" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:layout_marginStart="@dimen/spacing_medium">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="부재 횟수"
+                                style="@style/StatLabelText" />
+
+                            <TextView
+                                android:id="@+id/tvAwayCount"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0"
+                                style="@style/StatValueText"
+                                android:textColor="@color/away_dark" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+
+                <!-- 전체 통계 카드 -->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cardTotal"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/dashboard_card_height"
+                    android:layout_columnWeight="1"
+                    android:layout_margin="@dimen/card_margin"
+                    app:cardCornerRadius="@dimen/card_corner_radius"
+                    app:cardElevation="@dimen/card_elevation"
+                    app:cardBackgroundColor="@color/surface_variant">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"
+                        android:padding="@dimen/dashboard_card_padding"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="📊"
+                            android:textSize="@dimen/stat_icon_size" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:layout_marginStart="@dimen/spacing_medium">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="전체 기록"
+                                style="@style/StatLabelText" />
+
+                            <TextView
+                                android:id="@+id/tvTotalCount"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0"
+                                style="@style/StatValueText"
+                                android:textColor="@color/text_primary" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </androidx.cardview.widget.CardView>
+            </GridLayout>
+
+            <!-- 빠른 필터 버튼 -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="기간 필터"
+                android:textSize="@dimen/text_size_medium"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary"
+                android:layout_marginTop="@dimen/spacing_medium"
+                android:layout_marginBottom="@dimen/spacing_small" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="@dimen/spacing_medium">
+
+                <Button
+                    android:id="@+id/btnFilterToday"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/filter_button_height"
+                    android:layout_weight="1"
+                    android:text="오늘"
+                    android:gravity="center"
+                    android:onClick="onClickQuickFilter"
+                    style="@style/FilterButtonUnselected" />
+
+                <Button
+                    android:id="@+id/btnFilterWeek"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/filter_button_height"
+                    android:layout_weight="1"
+                    android:text="이번 주"
+                    android:gravity="center"
+                    android:onClick="onClickQuickFilter"
+                    style="@style/FilterButtonUnselected" />
+
+                <Button
+                    android:id="@+id/btnFilterMonth"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/filter_button_height"
+                    android:layout_weight="1"
+                    android:text="이번 달"
+                    android:gravity="center"
+                    android:onClick="onClickQuickFilter"
+                    style="@style/FilterButtonUnselected" />
+
+                <Button
+                    android:id="@+id/btnFilterAll"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/filter_button_height"
+                    android:layout_weight="1"
+                    android:text="전체"
+                    android:gravity="center"
+                    android:onClick="onClickQuickFilter"
+                    style="@style/FilterButtonSelected" />
+            </LinearLayout>
+
+            <!-- 기타 버튼 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="@dimen/spacing_medium">
+
+                <Button
+                    android:id="@+id/btn_load"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="@dimen/spacing_small"
+                    android:text="동기화"
+                    android:onClick="onClickDownload" />
+
+                <Button
+                    android:id="@+id/btn_filter"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="@dimen/spacing_small"
+                    android:text="날짜 범위"
+                    android:onClick="onClickFilter" />
+            </LinearLayout>
+
+            <!-- 상태 메시지 -->
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="데이터를 동기화하세요"
+                android:textSize="@dimen/text_size_small"
+                android:textColor="@color/text_secondary"
+                android:gravity="center"
+                android:layout_marginBottom="@dimen/spacing_medium"
+                android:visibility="gone" />
+
+            <!-- 활동 기록 리스트 -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="활동 기록"
+                android:textSize="@dimen/text_size_large"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary"
+                android:layout_marginBottom="@dimen/spacing_small" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <!-- ProgressBar (오버레이) -->
     <ProgressBar
         android:id="@+id/progressBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_margin="16dp"
         android:visibility="gone" />
-    
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/swipeRefreshLayout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            android:orientation="vertical" />
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-</LinearLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
