@@ -25,3 +25,5 @@
 
 detect.py가 Person과 Cell Phone만 감지하도록 설정되었으며, changedetection.py와의 연동도 정상적으로 작동합니다.
 
+
+

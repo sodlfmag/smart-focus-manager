@@ -135,8 +135,14 @@ class ChangeDetection:
         try:
             res = requests.post(self.HOST + '/api_root/Post/', data=data, files=file, headers=headers)
             print(f"Status sent: {state}, Response: {res.status_code}")
+            if res.status_code not in [200, 201]:
+                print(f"Error response: {res.text}")
+            else:
+                print(f"Successfully sent {state} to server at {now.isoformat()}")
         except Exception as e:
             print(f"Error sending status: {e}")
+            import traceback
+            traceback.print_exc()
         finally:
             file['image'].close()
 

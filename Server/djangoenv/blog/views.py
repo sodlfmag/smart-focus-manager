@@ -50,7 +50,7 @@ def js_test(request):
     return render(request, 'blog/js_test.html', {})
 
 class BlogImages(viewsets.ModelViewSet):
-    queryset = Post.objects.all()
+    queryset = Post.objects.all().order_by('-created_date')  # 최신순 정렬
     serializer_class = PostSerializer
     
     @action(detail=False, methods=['get'])

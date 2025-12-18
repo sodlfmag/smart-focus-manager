@@ -22,7 +22,9 @@ def get_server_status():
         response = requests.get(f'{HOST}/api/status/', timeout=5)
         if response.status_code == 200:
             data = response.json()
-            return data.get('is_running', False)
+            is_running = data.get('is_running', False)
+            print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Server status: is_running={is_running}")
+            return is_running
         else:
             print(f"Error: Server returned status code {response.status_code}")
             return False
@@ -52,24 +54,24 @@ def main():
             if is_running:
                 # 서버가 실행 중이라고 하면 detect.py가 실행되어야 함
                 if not is_process_running(detect_process):
-                    print("Starting detect.py...")
+                    print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Starting detect.py...")
                     # detect.py 실행 (웹캠 사용: source=0, Person(0)과 Cell Phone(67)만 감지)
                     detect_process = subprocess.Popen(
                         [sys.executable, str(DETECT_SCRIPT), '--source', '0', '--nosave', '--classes', '0', '67'],
                         cwd=str(EDGE_DIR)
                     )
-                    print(f"detect.py started with PID: {detect_process.pid}")
+                    print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] detect.py started with PID: {detect_process.pid}")
                 # else: 이미 실행 중이면 아무것도 하지 않음
             else:
                 # 서버가 중지되었다고 하면 detect.py를 종료해야 함
                 if is_process_running(detect_process):
-                    print("Stopping detect.py...")
+                    print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Stopping detect.py...")
                     detect_process.terminate()
                     try:
                         detect_process.wait(timeout=5)
-                        print("detect.py stopped successfully")
+                        print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] detect.py stopped successfully")
                     except subprocess.TimeoutExpired:
-                        print("Force killing detect.py...")
+                        print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Force killing detect.py...")
                         detect_process.kill()
                         detect_process.wait()
                     detect_process = None
