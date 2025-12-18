@@ -427,44 +427,60 @@ public class MainActivity extends AppCompatActivity {
                         // 페이지네이션된 응답
                         aryJson = jsonResponse.getJSONArray("results");
                         int count = jsonResponse.optInt("count", aryJson.length());
-                        String nextUrl = jsonResponse.optString("next", null);
+                        String nextUrl = null;
+                        if (!jsonResponse.isNull("next")) {
+                            nextUrl = jsonResponse.optString("next", null);
+                        }
                         Log.d(TAG, String.format("페이지네이션 응답 - 현재 페이지: %d개, 전체: %d개, 다음 페이지: %s", 
-                            aryJson.length(), count, nextUrl != null ? "있음" : "없음"));
+                            aryJson.length(), count, nextUrl != null && !nextUrl.equals("null") ? "있음" : "없음"));
                         
                         // 다음 페이지가 있으면 모든 페이지 가져오기
-                        while (nextUrl != null && !nextUrl.isEmpty()) {
+                        while (nextUrl != null && !nextUrl.isEmpty() && !nextUrl.equals("null")) {
                             Log.d(TAG, "다음 페이지 가져오기: " + nextUrl);
-                            URL nextPageUrl = new URL(nextUrl);
-                            HttpURLConnection nextConn = (HttpURLConnection) nextPageUrl.openConnection();
-                            nextConn.setRequestProperty("Authorization", "Token " + token);
-                            nextConn.setRequestMethod("GET");
-                            nextConn.setConnectTimeout(5000);
-                            nextConn.setReadTimeout(5000);
-                            
-                            int nextResponseCode = nextConn.getResponseCode();
-                            if (nextResponseCode == HttpURLConnection.HTTP_OK) {
-                                InputStream nextIs = nextConn.getInputStream();
-                                BufferedReader nextReader = new BufferedReader(new InputStreamReader(nextIs));
-                                StringBuilder nextResult = new StringBuilder();
-                                String nextLine;
-                                while ((nextLine = nextReader.readLine()) != null) {
-                                    nextResult.append(nextLine);
+                            try {
+                                URL nextPageUrl = new URL(nextUrl);
+                                HttpURLConnection nextConn = (HttpURLConnection) nextPageUrl.openConnection();
+                                nextConn.setRequestProperty("Authorization", "Token " + token);
+                                nextConn.setRequestMethod("GET");
+                                nextConn.setConnectTimeout(5000);
+                                nextConn.setReadTimeout(5000);
+                                
+                                int nextResponseCode = nextConn.getResponseCode();
+                                if (nextResponseCode == HttpURLConnection.HTTP_OK) {
+                                    InputStream nextIs = nextConn.getInputStream();
+                                    BufferedReader nextReader = new BufferedReader(new InputStreamReader(nextIs));
+                                    StringBuilder nextResult = new StringBuilder();
+                                    String nextLine;
+                                    while ((nextLine = nextReader.readLine()) != null) {
+                                        nextResult.append(nextLine);
+                                    }
+                                    nextIs.close();
+                                    
+                                    JSONObject nextJsonResponse = new JSONObject(nextResult.toString());
+                                    JSONArray nextAryJson = nextJsonResponse.getJSONArray("results");
+                                    
+                                    // 현재 배열에 추가
+                                    for (int j = 0; j < nextAryJson.length(); j++) {
+                                        aryJson.put(nextAryJson.get(j));
+                                    }
+                                    
+                                    // 다음 페이지 URL 확인
+                                    if (nextJsonResponse.isNull("next")) {
+                                        nextUrl = null;
+                                    } else {
+                                        nextUrl = nextJsonResponse.optString("next", null);
+                                        if (nextUrl != null && nextUrl.equals("null")) {
+                                            nextUrl = null;
+                                        }
+                                    }
+                                    Log.d(TAG, String.format("다음 페이지 추가 완료. 현재 총: %d개, 다음 페이지: %s", 
+                                        aryJson.length(), nextUrl != null ? "있음" : "없음"));
+                                } else {
+                                    Log.e(TAG, "다음 페이지 가져오기 실패: " + nextResponseCode);
+                                    break;
                                 }
-                                nextIs.close();
-                                
-                                JSONObject nextJsonResponse = new JSONObject(nextResult.toString());
-                                JSONArray nextAryJson = nextJsonResponse.getJSONArray("results");
-                                
-                                // 현재 배열에 추가
-                                for (int j = 0; j < nextAryJson.length(); j++) {
-                                    aryJson.put(nextAryJson.get(j));
-                                }
-                                
-                                nextUrl = nextJsonResponse.optString("next", null);
-                                Log.d(TAG, String.format("다음 페이지 추가 완료. 현재 총: %d개, 다음 페이지: %s", 
-                                    aryJson.length(), nextUrl != null ? "있음" : "없음"));
-                            } else {
-                                Log.e(TAG, "다음 페이지 가져오기 실패: " + nextResponseCode);
+                            } catch (Exception e) {
+                                Log.e(TAG, "다음 페이지 가져오기 중 예외 발생", e);
                                 break;
                             }
                         }
