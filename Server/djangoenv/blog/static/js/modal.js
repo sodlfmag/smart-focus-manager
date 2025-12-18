@@ -14,6 +14,13 @@ document.addEventListener('DOMContentLoaded', function() {
     
     let currentPostId = null;
 
+    // 삭제 버튼 존재 확인
+    if (!modalDeleteBtn) {
+        console.error('삭제 버튼을 찾을 수 없습니다.');
+    } else {
+        console.log('삭제 버튼이 성공적으로 로드되었습니다.');
+    }
+
     // 상태별 한글 표시
     const statusLabels = {
         'focus': '집중',
@@ -88,8 +95,16 @@ document.addEventListener('DOMContentLoaded', function() {
     // 닫기 버튼 클릭
     modalClose.addEventListener('click', closeModal);
 
-    // 오버레이 클릭 시 닫기
+    // 오버레이 클릭 시 닫기 (모달 콘텐츠 클릭은 무시)
     modalOverlay.addEventListener('click', closeModal);
+    
+    // 모달 콘텐츠 클릭 시 이벤트 전파 방지 (모달이 닫히지 않도록)
+    const modalContent = modal.querySelector('.modal-content');
+    if (modalContent) {
+        modalContent.addEventListener('click', function(event) {
+            event.stopPropagation();
+        });
+    }
 
     // ESC 키로 닫기
     document.addEventListener('keydown', function(event) {
@@ -99,54 +114,87 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // 삭제 버튼 클릭 이벤트
-    modalDeleteBtn.addEventListener('click', function(event) {
-        event.stopPropagation(); // 모달 닫기 방지
-        
-        if (!currentPostId) {
-            alert('삭제할 항목을 찾을 수 없습니다.');
-            return;
-        }
+    if (modalDeleteBtn) {
+        modalDeleteBtn.addEventListener('click', function(event) {
+            event.preventDefault(); // 기본 동작 방지
+            event.stopPropagation(); // 이벤트 버블링 방지
+            
+            console.log('삭제 버튼 클릭됨, currentPostId:', currentPostId);
+            
+            if (!currentPostId) {
+                alert('삭제할 항목을 찾을 수 없습니다.');
+                console.error('currentPostId가 null입니다.');
+                return;
+            }
 
-        // 삭제 확인
-        if (!confirm('정말로 이 활동 기록을 삭제하시겠습니까?')) {
-            return;
-        }
+            // 삭제 확인
+            if (!confirm('정말로 이 활동 기록을 삭제하시겠습니까?')) {
+                console.log('삭제 취소됨');
+                return;
+            }
 
-        // 삭제 API 호출
-        deletePost(currentPostId);
-    });
+            console.log('삭제 API 호출 시작, postId:', currentPostId);
+            // 삭제 API 호출
+            deletePost(currentPostId);
+        });
+        console.log('삭제 버튼 이벤트 리스너 등록 완료');
+    } else {
+        console.error('삭제 버튼이 없어 이벤트 리스너를 등록할 수 없습니다.');
+    }
 
     // 포스트 삭제 함수
     function deletePost(postId) {
         const apiUrl = `/api_root/Post/${postId}/`;
+        const csrfToken = getCookie('csrftoken');
+        
+        console.log('삭제 요청 시작:', {
+            url: apiUrl,
+            method: 'DELETE',
+            csrfToken: csrfToken ? '존재함' : '없음'
+        });
+        
+        const headers = {
+            'Content-Type': 'application/json',
+        };
+        
+        // CSRF 토큰이 있으면 추가
+        if (csrfToken) {
+            headers['X-CSRFToken'] = csrfToken;
+        }
         
         fetch(apiUrl, {
             method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCookie('csrftoken')
-            },
+            headers: headers,
             credentials: 'same-origin'
         })
         .then(response => {
+            console.log('삭제 응답 받음:', {
+                status: response.status,
+                statusText: response.statusText,
+                ok: response.ok
+            });
+            
             if (response.ok || response.status === 204) {
                 // 삭제 성공
+                console.log('삭제 성공');
                 alert('활동 기록이 삭제되었습니다.');
                 closeModal();
                 // 페이지 새로고침하여 목록 업데이트
                 window.location.reload();
             } else {
                 // 삭제 실패
-                response.json().then(data => {
+                console.error('삭제 실패, 상태 코드:', response.status);
+                return response.json().then(data => {
+                    console.error('삭제 실패 응답 데이터:', data);
                     alert('삭제에 실패했습니다: ' + (data.detail || '알 수 없는 오류'));
                 }).catch(() => {
-                    alert('삭제에 실패했습니다.');
+                    alert('삭제에 실패했습니다. 상태 코드: ' + response.status);
                 });
             }
         })
         .catch(error => {
-            console.error('삭제 중 오류 발생:', error);
-            alert('삭제 중 오류가 발생했습니다.');
+            console.error('삭제 중 네트워크 오류 발생:', error);
+            alert('삭제 중 오류가 발생했습니다: ' + error.message);
         });
     }
 
