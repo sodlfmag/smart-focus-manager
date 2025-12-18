@@ -7,7 +7,30 @@ body {
     min-height: 100vh;
 }
 
-/* 헤더 스타일 */
+/* 대시보드 헤더 스타일 */
+.dashboard-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 30px 0;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.header-content h1 {
+    margin: 0;
+}
+
+.header-subtitle {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1em;
+    margin-top: 10px;
+    font-weight: 300;
+}
+
+/* 헤더 스타일 (기존 호환성) */
 .header {
     text-align: center;
     margin-bottom: 40px;
@@ -67,10 +90,203 @@ h1 a:hover {
     transform: scale(1.05);
 }
 
+/* 대시보드 컨텐츠 */
+.dashboard-content {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* 통계 대시보드 */
+.stats-dashboard {
+    margin-bottom: 40px;
+}
+
+.stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: all 0.3s ease;
+    border-left: 5px solid;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+}
+
+.stat-card.stat-focus {
+    border-left-color: #4caf50;
+}
+
+.stat-card.stat-distracted {
+    border-left-color: #f44336;
+}
+
+.stat-card.stat-away {
+    border-left-color: #9e9e9e;
+}
+
+.stat-card.stat-total {
+    border-left-color: #2196f3;
+}
+
+.stat-icon {
+    font-size: 3em;
+    line-height: 1;
+}
+
+.stat-content {
+    flex: 1;
+}
+
+.stat-label {
+    font-size: 0.9em;
+    color: #666;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.stat-value {
+    font-size: 2.5em;
+    font-weight: 700;
+    color: #333;
+    line-height: 1;
+    margin-bottom: 5px;
+}
+
+.stat-count {
+    font-size: 0.85em;
+    color: #999;
+}
+
+/* 섹션 제목 */
+.section-title {
+    color: white;
+    font-size: 1.8em;
+    font-weight: 600;
+    margin: 30px 0 20px 0;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
 /* 포스트 컨테이너 */
 .posts-container {
-    max-width: 800px;
+    max-width: 1200px;
     margin: 0 auto;
+}
+
+/* 포스트 그리드 */
+.posts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+/* 포스트 카드 스타일 */
+.post-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border-left: 4px solid;
+    display: flex;
+    flex-direction: column;
+    min-height: 120px;
+}
+
+.post-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+/* 상태별 색상 */
+.post-card.post-focus {
+    border-left-color: #4caf50;
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.05) 0%, rgba(255, 255, 255, 0.95) 100%);
+}
+
+.post-card.post-distracted {
+    border-left-color: #f44336;
+    background: linear-gradient(135deg, rgba(244, 67, 54, 0.05) 0%, rgba(255, 255, 255, 0.95) 100%);
+}
+
+.post-card.post-away {
+    border-left-color: #9e9e9e;
+    background: linear-gradient(135deg, rgba(158, 158, 158, 0.05) 0%, rgba(255, 255, 255, 0.95) 100%);
+}
+
+.post-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.post-status-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85em;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-badge.status-focus {
+    background: #4caf50;
+    color: white;
+}
+
+.status-badge.status-distracted {
+    background: #f44336;
+    color: white;
+}
+
+.status-badge.status-away {
+    background: #9e9e9e;
+    color: white;
+}
+
+.post-date {
+    font-size: 0.85em;
+    color: #666;
+    font-weight: 500;
+}
+
+.post-card-body {
+    flex: 1;
+}
+
+.post-card-text {
+    color: #555;
+    font-size: 0.95em;
+    line-height: 1.6;
+    margin: 0 0 10px 0;
+}
+
+.post-image-indicator {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: #999;
+    font-size: 0.85em;
+    margin-top: 10px;
+}
+
+.image-icon {
+    font-size: 1.2em;
 }
 
 /* 개별 포스트 스타일 */
@@ -376,6 +592,144 @@ h1 a:hover {
     text-decoration: none;
 }
 
+/* 모달 스타일 */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 1;
+}
+
+.modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    position: relative;
+    background: white;
+    border-radius: 15px;
+    max-width: 800px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    z-index: 1001;
+    animation: modalSlideIn 0.3s ease;
+}
+
+@keyframes modalSlideIn {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(0, 0, 0, 0.1);
+    border: none;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+    color: #666;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    z-index: 1002;
+}
+
+.modal-close:hover {
+    background: rgba(0, 0, 0, 0.2);
+    color: #333;
+    transform: rotate(90deg);
+}
+
+.modal-header {
+    padding: 25px;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.modal-title {
+    margin: 0;
+    font-size: 1.8em;
+    color: #333;
+    font-weight: 600;
+}
+
+.modal-status-badge {
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.9em;
+    font-weight: 600;
+}
+
+.modal-body {
+    padding: 25px;
+}
+
+.modal-image-container {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.modal-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.modal-info {
+    margin-top: 20px;
+}
+
+.modal-date {
+    color: #666;
+    font-size: 0.95em;
+    margin-bottom: 15px;
+    font-weight: 500;
+}
+
+.modal-text {
+    color: #555;
+    line-height: 1.8;
+    font-size: 1em;
+    margin: 0;
+}
+
 /* 반응형 디자인 */
 @media (max-width: 768px) {
     body {
@@ -454,5 +808,35 @@ h1 a:hover {
     .btn-edit {
         width: 100%;
         justify-content: center;
+    }
+    
+    /* 대시보드 반응형 */
+    .stats-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .posts-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .stat-value {
+        font-size: 2em;
+    }
+    
+    .modal-content {
+        width: 95%;
+        max-height: 95vh;
+    }
+    
+    .modal-header {
+        padding: 20px;
+    }
+    
+    .modal-title {
+        font-size: 1.4em;
+    }
+    
+    .modal-body {
+        padding: 20px;
     }
 }

@@ -9,10 +9,62 @@ from rest_framework import status
 from .serializers import PostSerializer
 from django.db.models import Count, Max
 from collections import defaultdict
+from datetime import datetime, timedelta
 
 def post_list(request):
     posts = Post.objects.all().order_by('-created_date')
-    return render(request, 'blog/post_list.html', {'posts': posts})
+    
+    # 오늘 날짜 기준 통계 계산
+    today = timezone.now().date()
+    today_start = timezone.make_aware(datetime.combine(today, datetime.min.time()))
+    today_end = today_start + timedelta(days=1)
+    
+    today_posts = Post.objects.filter(
+        created_date__gte=today_start,
+        created_date__lt=today_end
+    )
+    
+    # 오늘 통계
+    today_focus_count = today_posts.filter(title='Focus').count()
+    today_distracted_count = today_posts.filter(title='Distracted').count()
+    today_away_count = today_posts.filter(title='Away').count()
+    today_total = today_posts.count()
+    
+    # 집중시간 비율 계산
+    today_focus_percent = 0
+    if today_total > 0:
+        today_focus_percent = int((today_focus_count * 100) / today_total)
+    
+    # 전체 통계
+    all_focus_count = Post.objects.filter(title='Focus').count()
+    all_distracted_count = Post.objects.filter(title='Distracted').count()
+    all_away_count = Post.objects.filter(title='Away').count()
+    all_total = Post.objects.count()
+    
+    # 전체 집중시간 비율
+    all_focus_percent = 0
+    if all_total > 0:
+        all_focus_percent = int((all_focus_count * 100) / all_total)
+    
+    context = {
+        'posts': posts,
+        'today_stats': {
+            'focus_count': today_focus_count,
+            'distracted_count': today_distracted_count,
+            'away_count': today_away_count,
+            'total': today_total,
+            'focus_percent': today_focus_percent,
+        },
+        'all_stats': {
+            'focus_count': all_focus_count,
+            'distracted_count': all_distracted_count,
+            'away_count': all_away_count,
+            'total': all_total,
+            'focus_percent': all_focus_percent,
+        }
+    }
+    
+    return render(request, 'blog/post_list.html', context)
 
 def post_detail(request, pk):
     post = get_object_or_404(Post, pk=pk)

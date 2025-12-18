@@ -4,12 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Intruder Detection{% endblock %}</title>
+    <title>{% block title %}Smart Focus Manager{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/blog.css' %}">
 </head>
 <body>
-    <div class="header">
-        <h1><a href="/">Intruder Detection</a></h1>
+    <div class="dashboard-header">
+        <div class="header-content">
+            <h1><a href="/">Smart Focus Manager</a></h1>
+            <p class="header-subtitle">집중 상태 모니터링 대시보드</p>
+        </div>
         {% if user.is_authenticated %}
         <div class="top-menu">
             <a href="{% url 'blog:post_new' %}" class="btn-new-post">
@@ -19,9 +22,32 @@
         {% endif %}
     </div>
     
-    <div class="content">
+    <div class="dashboard-content">
         {% block content %}
         {% endblock %}
     </div>
+    
+    <!-- 모달 구조 -->
+    <div id="postModal" class="modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <button class="modal-close" aria-label="닫기">&times;</button>
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle"></h2>
+                <span class="modal-status-badge" id="modalStatus"></span>
+            </div>
+            <div class="modal-body">
+                <div class="modal-image-container" id="modalImageContainer">
+                    <img id="modalImage" src="" alt="" class="modal-image">
+                </div>
+                <div class="modal-info">
+                    <p class="modal-date" id="modalDate"></p>
+                    <p class="modal-text" id="modalText"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="{% static 'js/modal.js' %}"></script>
 </body>
 </html>

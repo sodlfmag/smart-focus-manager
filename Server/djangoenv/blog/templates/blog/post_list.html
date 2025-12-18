@@ -1,36 +1,75 @@
 {% extends 'blog/base.html' %}
+{% load static %}
 
 {% block content %}
+<!-- 통계 대시보드 -->
+<div class="stats-dashboard">
+    <div class="stats-row">
+        <div class="stat-card stat-focus">
+            <div class="stat-icon">🎯</div>
+            <div class="stat-content">
+                <div class="stat-label">오늘 집중시간</div>
+                <div class="stat-value">{{ today_stats.focus_percent }}%</div>
+                <div class="stat-count">{{ today_stats.focus_count }}회</div>
+            </div>
+        </div>
+        <div class="stat-card stat-distracted">
+            <div class="stat-icon">📱</div>
+            <div class="stat-content">
+                <div class="stat-label">오늘 딴짓 횟수</div>
+                <div class="stat-value">{{ today_stats.distracted_count }}</div>
+                <div class="stat-count">회</div>
+            </div>
+        </div>
+        <div class="stat-card stat-away">
+            <div class="stat-icon">🚶</div>
+            <div class="stat-content">
+                <div class="stat-label">오늘 부재 횟수</div>
+                <div class="stat-value">{{ today_stats.away_count }}</div>
+                <div class="stat-count">회</div>
+            </div>
+        </div>
+        <div class="stat-card stat-total">
+            <div class="stat-icon">📊</div>
+            <div class="stat-content">
+                <div class="stat-label">전체 통계</div>
+                <div class="stat-value">{{ all_stats.total }}</div>
+                <div class="stat-count">집중 {{ all_stats.focus_percent }}%</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 포스트 목록 -->
 <div class="posts-container">
-    {% for post in posts %}
-        <div class="post">
-            <div class="post-header">
-                <p class="post-date">
-                    <strong>Published:</strong> 
-                    {% if post.published_date %}
-                        {{ post.published_date|date:"F d, Y" }}
-                    {% else %}
-                        Draft
-                    {% endif %}
-                </p>
-            </div>
-            <div class="post-body">
-                <h2 class="post-title">
-                    <a href="{% url 'blog:post_detail' pk=post.pk %}">{{ post.title }}</a>
-                </h2>
-                {% if post.image %}
-                <div class="post-image-list">
-                    <img src="{{ post.image.url }}" class="blog-image-list" alt="{{ post.title }}">
+    <h2 class="section-title">활동 기록</h2>
+    <div class="posts-grid">
+        {% for post in posts %}
+            <div class="post-card post-{{ post.title|lower }}" 
+                 data-post-id="{{ post.pk }}"
+                 data-post-title="{{ post.title }}"
+                 data-post-text="{{ post.text }}"
+                 data-post-date="{{ post.created_date|date:'Y-m-d H:i:s' }}"
+                 {% if post.image %}data-post-image="{{ post.image.url }}"{% endif %}>
+                <div class="post-card-header">
+                    <span class="post-status-badge status-{{ post.title|lower }}">{{ post.title }}</span>
+                    <span class="post-date">{{ post.created_date|date:"m/d H:i" }}</span>
                 </div>
-                {% endif %}
-                <p class="post-content">{{ post.text|linebreaksbr|truncatewords:30 }}</p>
+                <div class="post-card-body">
+                    <p class="post-card-text">{{ post.text|truncatewords:15 }}</p>
+                    {% if post.image %}
+                    <div class="post-image-indicator">
+                        <span class="image-icon">📷</span> 이미지 있음
+                    </div>
+                    {% endif %}
+                </div>
             </div>
-        </div>
-    {% empty %}
-        <div class="empty-message">
-            <h3>아직 게시된 포스트가 없습니다.</h3>
-            <p>첫 번째 포스트를 작성해보세요!</p>
-        </div>
-    {% endfor %}
+        {% empty %}
+            <div class="empty-message">
+                <h3>아직 기록이 없습니다.</h3>
+                <p>시스템이 활성화되면 활동 기록이 표시됩니다.</p>
+            </div>
+        {% endfor %}
+    </div>
 </div>
 {% endblock %}
